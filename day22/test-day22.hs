@@ -21,7 +21,8 @@ testAOCInputs = TestList $ do
     let state = mkSimState bHP bDmg
     (n, part, ans) <- zip3 [1::Int ..] [roundPart1, roundPart2] answers
     let lbl = printf "boss hp %d, dmg %d, part %d" bHP bDmg n
-    return $ lbl ~: ans ~=? (\(x,_,_) -> x) (searcher simObjective score part state)
+        BBResult r _ = searcher simObjective score part state
+    return $ lbl ~: Just ans ~=? fmap fst r
 
 main :: IO ()
 main = do

@@ -7,12 +7,16 @@ move (x,y) '>' = (x+1, y)
 move (x,y) '<' = (x-1, y)
 move (x,y) _   = (x, y)
 
+track :: [Char] -> [(Int, Int)]
 track = scanl move (0,0)
 
+tallyHouses :: [(Int, Int)] -> Int
 tallyHouses = Set.size . Set.fromList
 
+fork :: [a] -> ([a], [a])
 fork = foldr (\x (a,b) -> (x:b,a)) ([],[])
 
+main :: IO ()
 main = do
     input <- readFile "input.txt"
     putStrLn $ "year 1: " ++ show (tallyHouses $ track input)

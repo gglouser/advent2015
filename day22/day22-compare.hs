@@ -10,9 +10,9 @@ import SimSearch
 branchFactor :: Int -> Int -> Double
 branchFactor n d = fromIntegral n ** (1 / fromIntegral d)
 
-report :: (Int, Maybe SimState, Int) -> IO ()
-report (_, Nothing, n) = putStrLn $ printf "     no solution; %7d nodes expanded" n
-report (m, Just s, n) = putStrLn $ printf "%5d mana spent; %7d nodes expanded; EBF %f"
+report :: BBResult SimState -> IO ()
+report (BBResult Nothing n) = putStrLn $ printf "     no solution; %7d nodes expanded" n
+report (BBResult (Just (m,s)) n) = putStrLn $ printf "%5d mana spent; %7d nodes expanded; EBF %f"
     m n (branchFactor n (s^.spellTrace.to length))
 
 runSearch :: SimState -> (String, BBSearch SimState) -> IO ()

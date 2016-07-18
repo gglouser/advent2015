@@ -18,9 +18,10 @@ benchSearcher label searcher = bgroup label $ do
         (initState_71_10, "71-10")]
     (part, partLbl) <- [(roundPart1, "part1"), (roundPart2, "part2")]
     let search = searcher simObjective score part
-    return $ bench (stateLbl ++ "-" ++ partLbl) $ nf (fst3 . search) state
+    return $ bench (stateLbl ++ "-" ++ partLbl) $ nf (getScore . search) state
 
-fst3 (x,_,_) = x
+getScore (BBResult Nothing _) = -1
+getScore (BBResult (Just (s,_)) _) = s
 
 main :: IO ()
 main = defaultMain [

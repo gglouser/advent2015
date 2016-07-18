@@ -1,16 +1,29 @@
-import Control.Applicative
+import Control.Applicative (some)
+import qualified Data.Map.Strict as Map
 import qualified Text.Parsec as P
 
-data Aunt = Aunt Int [(String, Int)] deriving Show
+type Stats a = Map.Map String a
 
-parse :: P.Parsec String () [Aunt]
-parse = paunt `P.endBy` P.endOfLine
+parse :: String -> Either P.ParseError [(Int, Stats Int)]
+parse = P.parse aunts ""
     where
-        pnum = read <$> some P.digit
-        pitem = (,) <$> (some P.lower <* P.string ": ") <*> pnum
-        paunt = Aunt <$> (P.string "Sue " *> pnum <* P.string ": ")
-                     <*> pitem `P.sepBy` P.string ", "
+        aunts = aunt `P.endBy` P.endOfLine
+        aunt = (,) <$> (P.string "Sue " *> num) <* P.string ": "
+                    <*> (Map.fromList <$> item `P.sepBy` P.string ", ")
+        item = (,) <$> some P.lower <* P.string ": " <*> num
+        num = read <$> some P.digit
 
+mkChecker :: [String] -> [String] -> [(String, Int)] -> Stats (Int -> Bool)
+mkChecker lbs ubs = Map.mapWithKey f . Map.fromList
+    where
+        f a | a `elem` lbs = (<)
+            | a `elem` ubs = (>)
+            | otherwise    = (==)
+
+check :: Stats (Int -> Bool) -> Stats Int -> Bool
+check m = Map.foldr' (&&) True . Map.intersectionWith ($) m
+
+trueSue :: [(String, Int)]
 trueSue = [
     ("children", 3),
     ("cats", 7),
@@ -23,24 +36,20 @@ trueSue = [
     ("cars", 2),
     ("perfumes", 1)]
 
-checkSue (Aunt _ attrs) = all (`elem` trueSue) attrs
+checker1 :: Stats (Int -> Bool)
+checker1 = mkChecker [] [] trueSue
 
-checkSue2 (Aunt _ attrs) = all ch attrs
-    where
-        ch ("cats", n) = n > 7
-        ch ("trees", n) = n > 3
-        ch ("pomeranians", n) = n < 3
-        ch ("goldfish", n) = n < 5
-        ch attr = attr `elem` trueSue
+checker2 :: Stats (Int -> Bool)
+checker2 = mkChecker ["cats", "trees"] ["pomeranians", "goldfish"] trueSue
 
+main :: IO ()
 main = do
     input <- readFile "input.txt"
-    case P.parse parse "input.txt" input of
+    case parse input of
         Left err -> print err
         Right aunts -> do
-            print $ length aunts
-            print $ filter checkSue aunts
-            print $ filter checkSue2 aunts
+            print $ fst . head $ filter (check checker1 . snd) aunts
+            print $ fst . head $ filter (check checker2 . snd) aunts
 
 {-
 40

@@ -1,6 +1,4 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-import BasePrelude
-
+pwIncr :: [Char] -> [Char]
 pwIncr [] = []
 pwIncr ('z':cs) = 'a' : pwIncr cs
 pwIncr ('h':cs) = 'j' : cs          -- skip 'i'
@@ -23,15 +21,21 @@ pwFindInit = g . foldr f ([], False)
 checkStraight :: [Char] -> Bool
 checkStraight = or . (zipWith3 (\a b c -> a == succ b && b == succ c) <*> drop 1 <*> drop 2)
 
+nPair :: Eq a => Int -> [a] -> Bool
 nPair 0 _ = True
 nPair n (a:s@(b:s')) = a == b && nPair (n-1) s' || nPair n s
 nPair _ _ = False
 
+valid :: [Char] -> Bool
 valid pw = checkStraight pw && nPair 2 pw
 
+pwFind :: [Char] -> [[Char]]
 pwFind = map reverse . filter valid . iterate pwIncr . pwFindInit . reverse
 
+input :: [Char]
 input = "vzbxkghb"
+
+main :: IO ()
 main = putStr . unlines . take 2 $ pwFind input
 
 {-

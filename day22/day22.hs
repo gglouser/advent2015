@@ -7,8 +7,8 @@ import SimSearch
 runSearch :: (SimState -> [SimState]) -> SimState -> IO ()
 runSearch branch initState = do
     case searchDFS2 simObjective score branch initState of
-        (_, Nothing, _) -> putStrLn "no solution"
-        (_, Just s, _) -> do
+        (BBResult Nothing _) -> putStrLn "no solution"
+        (BBResult (Just (_,s)) _) -> do
             print $ _manaSpent s
             print $ _spellTrace s
 

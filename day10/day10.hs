@@ -1,7 +1,8 @@
-import Data.List
+import Control.Monad ((>=>))
+import Data.List (group)
 
 looksay :: [Char] -> [Char]
-looksay = concatMap (\xs -> show (length xs) ++ [head xs]) . group
+looksay = group >=> (++) . show . length <*> take 1
 
 lsLen :: Int -> [Char] -> Int
 lsLen n = length . (!! n) . iterate looksay

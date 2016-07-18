@@ -1,10 +1,29 @@
 # For more information, see: https://github.com/commercialhaskell/stack/blob/release/doc/yaml_configuration.md
 
 # Specifies the GHC version and set of packages available (e.g., lts-3.5, nightly-2015-09-21, ghc-7.10.2)
-resolver: lts-4.0
+resolver: lts-6.7
 
 # Local packages, usually specified by relative directory name
 packages:
+- day01
+- day02
+- day03
+- day04
+- day05
+- day06
+- day07
+- day08
+- day09
+- day10
+- day11
+- day12
+- day13
+- day14
+- day15
+- day16
+- day17
+- day18
+- day19
 - day20
 - day21
 - day22

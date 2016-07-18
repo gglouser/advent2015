@@ -13,14 +13,15 @@ abaTest s = or $ zipWith (==) s (drop 2 s)
 
 nice2 s = twoPair s && abaTest s
 
+main :: IO ()
 main = do
-    input <- fmap lines $ readFile "input.txt"
+    input <- lines <$> readFile "input.txt"
     let count1 = length $ filter nice1 input
     putStrLn $ "nice rule 1: " ++ show count1
     let count2 = length $ filter nice2 input
     putStrLn $ "nice rule 2: " ++ show count2
 
 {-
-255
-55
+nice rule 1: 255
+nice rule 2: 55
 -}

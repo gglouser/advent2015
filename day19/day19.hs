@@ -1,4 +1,4 @@
-import Data.List
+import Data.List (sortBy, stripPrefix)
 import Data.Ord (comparing)
 import Data.Tuple (swap)
 import qualified Data.Set as Set
@@ -36,6 +36,7 @@ revSearch tfs s = do
 
 -----
 
+main :: IO ()
 main = do
     input <- parse `fmap` readFile "input.txt"
     let (trans, medmol) = input

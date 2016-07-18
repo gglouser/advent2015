@@ -1,21 +1,24 @@
-import Control.Applicative
 import Data.List (permutations)
 import qualified Data.Map.Strict as Map
 
-parse :: String -> Map.Map String (Map.Map String Int)
-parse = Map.fromListWith Map.union . concatMap (entry . line . words) . lines
+type Roads = Map.Map String (Map.Map String Int)
+
+parse :: String -> Roads
+parse = Map.fromListWith Map.union . concatMap (roads . line . words) . lines
     where
-        line l = (l !! 0, l !! 2, read (l !! 4))
-        entry (a,b,d) = [(a, Map.singleton b d), (b, Map.singleton a d)]
+        line [a,_,b,_,d] = (a, b, read d)
+        roads (a,b,d) = [(a, Map.singleton b d), (b, Map.singleton a d)]
 
+dist :: Roads -> String -> String -> Int
 dist m a b = (m Map.! a) Map.! b
-pathLen m cities = sum $ zipWith (dist m) cities (drop 1 cities)
 
+pathLen :: Roads -> [String] -> Int
+pathLen m = sum . (zipWith (dist m) <*> drop 1)
+
+main :: IO ()
 main = do
     input <- parse <$> readFile "input.txt"
-    let cities = Map.keys input
-        allPaths = permutations cities
-        pathLens = map (pathLen input) allPaths
+    let pathLens = map (pathLen input) . permutations $ Map.keys input
     putStrLn $ "minimum path: " ++ show (minimum pathLens)
     putStrLn $ "maximum path: " ++ show (maximum pathLens)
 

@@ -1,35 +1,45 @@
-{-# LANGUAGE NoImplicitPrelude #-}
-import BasePrelude
-import Text.Parsec (between, char, sepBy, digit, noneOf, parse, option)
+import Control.Applicative
 import qualified Data.Map.Strict as Map
+import qualified Text.Parsec as P
 
-data Val = VS String | VN Int | VA [Val] | VO (Map.Map String Val) deriving (Show, Eq)
+data Json = Str String
+          | Num Int
+          | Array [Json]
+          | Object (Map.Map String Json)
+    deriving (Eq, Show)
 
-pnum = option id (negate <$ char '-') <*> (read <$> some digit)
-pstr = between (char '"') (char '"') (many (noneOf "\""))
-parr = between (char '[') (char ']') (pval `sepBy` char ',')
-pslot = (,) <$> (pstr <* char ':') <*> pval
-pobj = Map.fromList <$> between (char '{') (char '}') (pslot `sepBy` char ',')
-pval = VS <$> pstr <|> VN <$> pnum <|> VA <$> parr <|> VO <$> pobj
+parse :: String -> Either P.ParseError Json
+parse = P.parse json ""
+    where
+        json = Str <$> str
+           <|> Num <$> num
+           <|> Array <$> arr
+           <|> Object <$> obj
+        str = P.between (P.char '"') (P.char '"') (many (P.noneOf "\""))
+        num = P.option id (negate <$ P.char '-') <*> (read <$> some P.digit)
+        arr = P.between (P.char '[') (P.char ']') (json `P.sepBy` P.char ',')
+        obj = Map.fromList <$> P.between (P.char '{') (P.char '}') (slot `P.sepBy` P.char ',')
+        slot = (,) <$> str <* P.char ':' <*> json
 
-eval :: Val -> Int
-eval (VS _) = 0
-eval (VN n) = n
-eval (VA va) = sum $ map eval va
-eval (VO vo) = Map.foldr ((+) . eval) 0 vo
+eval :: Json -> Int
+eval (Str _) = 0
+eval (Num n) = n
+eval (Array a) = sum $ map eval a
+eval (Object o) = sum $ Map.map eval o
 
-dered :: Val -> Val
-dered (VO vo) = VO $ if elem (VS "red") (Map.elems vo) then Map.empty else Map.map dered vo
-dered (VA va) = VA $ map dered va
+dered :: Json -> Json
+dered (Object o) = Object $ if elem (Str "red") (Map.elems o) then Map.empty else Map.map dered o
+dered (Array a) = Array $ map dered a
 dered v = v
 
+main :: IO ()
 main = do
     input <- readFile "input.txt"
-    case parse pval "input.txt" input of
+    case parse input of
         Left err -> print err
         Right ledger -> do
             print $ eval ledger
-            print $ eval . dered $ ledger
+            print $ eval $ dered ledger
 
 {-
 156366

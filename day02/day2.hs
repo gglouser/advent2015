@@ -1,20 +1,21 @@
-paperReq (a,b,c) = 2*(x + y + z) + min x (min y z)
+import qualified Data.ByteString.Char8 as C
+
+paperReq :: (Int, Int, Int) -> Int
+paperReq (a,b,c) = 2*sum areas + minimum areas
+    where areas = [a*b, b*c, c*a]
+
+ribbonReq :: (Int, Int, Int) -> Int
+ribbonReq (a,b,c) = 2*minimum [a+b, a+c, b+c] + a*b*c
+
+parse :: C.ByteString -> [(Int, Int, Int)]
+parse = map (tup . map toI . C.split 'x') . C.lines
     where
-        x = a*b
-        y = b*c
-        z = c*a
+        tup (a:b:c:_) = (a,b,c)
+        toI = maybe (error "expected number") fst . C.readInt
 
-ribbonReq (a,b,c) = 2*(min (a+b) (min (a+c) (b+c))) + a*b*c
-
-reader :: String -> (Int, Int, Int)
-reader s = (read a, read b, read c)
-    where
-        (a,s') = break (== 'x') s
-        (b,s'') = break (== 'x') $ tail s'
-        c = tail s''
-
+main :: IO ()
 main = do
-    input <- (map reader . lines) `fmap` readFile "input.txt"
+    input <- parse <$> C.readFile "input.txt"
     putStrLn $ "paper:  " ++ show (sum $ map paperReq input)
     putStrLn $ "ribbon: " ++ show (sum $ map ribbonReq input)
 

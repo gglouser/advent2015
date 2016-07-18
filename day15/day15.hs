@@ -1,12 +1,11 @@
-import Data.List
-import Data.Ord
-
 type Ingredient = [Int]
 
 parse :: String -> [Ingredient]
-parse = map (map read . pline . words) . lines
-    where pline l = [init (l!!2), init (l!!4), init (l!!6), init (l!!8), l!!10]
+parse = map (map read . line . words) . lines
+    where
+        line [_,_,a,_,b,_,c,_,d,_,e] = [init a, init b, init c, init d, e]
 
+iscale :: [Int] -> Int -> [Int]
 iscale vs n = map (* n) vs
 
 score :: [Ingredient] -> [Int] -> (Int, Int)
@@ -18,15 +17,17 @@ gen _ 0 = [[]]
 gen tsps 1 = [[tsps]]
 gen tsps n = [tsp : xs | tsp <- [0..tsps], xs <- gen (tsps-tsp) (n-1)]
 
+scores :: [Ingredient] -> Int -> [([Int], (Int, Int))]
 scores is tsps = [(ts, score is ts) | ts <- gen tsps (length is)]
 
+main :: IO ()
 main = do
-    input <- parse `fmap` readFile "input.txt"
-    putStrLn $ show input
+    input <- parse <$> readFile "input.txt"
     let s = scores input 100
-    print $ length s
-    print $ maximumBy (comparing (fst . snd)) $ s
-    print $ maximumBy (comparing (fst . snd)) . filter ((== 500) . (snd . snd)) $ s
+        finalScore = fst . snd
+        cals = snd . snd
+    print $ maximum . map finalScore $ s
+    print $ maximum . map finalScore . filter ((== 500) . cals) $ s
 
 {-
 222870
