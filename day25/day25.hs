@@ -16,6 +16,7 @@ coordToIndex :: Int -> Int -> Int
 coordToIndex row col = (x*(x-1)) `div` 2 + col
     where x = row + col - 1
 
+main :: IO ()
 main = do
     let i = coordToIndex 2947 3029
     print $ getCode $ 20151125 * 252533^(i-1)

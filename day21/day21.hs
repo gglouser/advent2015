@@ -1,5 +1,5 @@
-import Data.List
-import Data.Ord
+import Data.List (minimumBy, maximumBy, partition)
+import Data.Ord (comparing)
 
 consume3 :: (a -> a -> a -> b) -> [a] -> b
 consume3 f (a:b:c:_) = f a b c
@@ -47,19 +47,19 @@ loadouts weaps arms rings = do
     r <- [0..2] >>= flip choose rings
     return . foldr (\(c,o) (t,os) -> (c+t, o:os)) (0,[]) $ w : a ++ r
 
-oadd (Obj hp1 d1 a1) (Obj hp2 d2 a2) = Obj (hp1+hp2) (d1+d2) (a1+a2)
-
 equip :: Object -> [Object] -> Object
 equip = foldl oadd
+    where
+        oadd (Obj hp1 d1 a1) (Obj hp2 d2 a2) = Obj (hp1+hp2) (d1+d2) (a1+a2)
 
-player = Obj 100 0 0
-
+main :: IO ()
 main = do
     boss <- parseBoss `fmap` readFile "input.txt"
     itemShop <- parseShop `fmap` readFile "itemshop.txt"
     let options = uncurry3 loadouts itemShop
+        player = Obj 100 0 0
         playerWins items = combat (equip player items) boss
-        (wins,losses) = partition (playerWins . snd) options
+        (wins, losses) = partition (playerWins . snd) options
     print $ minimumBy (comparing fst) wins
     print $ maximumBy (comparing fst) losses
 
